@@ -6,10 +6,13 @@
 """
 
 import os
-from flask import Flask, request, redirect, render_template, abort, send_from_directory
+import random
+from flask import Flask, request, redirect, url_for, render_template, abort, send_from_directory, jsonify
+
+import url
 
 app = Flask(__name__)
-urlPool = {'163': 'http://www.163.com'}
+urlPool = dict()
 
 
 @app.route('/favicon.ico')
@@ -28,14 +31,24 @@ def pageNotFound(e):
 
 
 @app.route('/<url>')
-def shortURL(url):
+def gotoURL(url):
     #print request.headers
     #print request.remote_addr
     longUrl = urlPool.get(url)
     if longUrl:
-        return redirect(longUrl, 301)
+        return redirect("http://" + longUrl, 301)
     else:
         abort(404)
+
+
+@app.route('/shortURL', methods=['POST'])
+def shortURL():
+    longUrl = request.form['url']
+    shortUrl = url.shortenURL(longUrl)[random.randint(0, 3)]
+    print shortUrl
+    urlPool[shortUrl] = longUrl
+    #return jsonify(shortUrl)
+    return redirect(url_for("index"))
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True)
