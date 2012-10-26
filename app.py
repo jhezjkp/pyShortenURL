@@ -7,8 +7,8 @@
 
 import os
 import sys
-import random
 from flask import Flask, request, redirect, url_for, render_template, abort, send_from_directory, jsonify, session
+import redis
 
 import url
 
@@ -16,7 +16,8 @@ app = Flask(__name__)
 app.config.update(
     SECRET_KEY=os.urandom(32).encode('hex')
 )
-urlPool = dict()
+#redis
+r = redis.StrictRedis(host="localhost", port=6379, db=0)
 
 
 @app.route('/favicon.ico')
@@ -38,7 +39,7 @@ def pageNotFound(e):
 def gotoURL(url):
     #print request.headers
     #print request.remote_addr
-    longUrl = urlPool.get(url)
+    longUrl = r.get(url)
     if longUrl:
         return redirect("http://" + longUrl, 301)
     else:
@@ -52,11 +53,26 @@ def containsAny(seq, aset):
             return False
     return True
 
+
+def storeToRedis(shortUrl, longUrl, durationInHours):
+    '''存储短网址对应关系到redis'''
+    if not r.setnx(shortUrl, longUrl) and r.get(shortUrl) != longUrl:
+        return False
+    #保存到会话中
+    myUrls = session.get('myUrls', dict())
+    myUrls[longUrl] = shortUrl
+    session['myUrls'] = myUrls
+    #更新生存时间
+    if durationInHours > 0:
+        return r.expire(shortUrl, durationInHours * 3600)
+    return True
+
+
 @app.route('/shortURL', methods=['POST'])
 def shortURL():
     longUrl = request.form.get('longUrl', None)
     shortUrl = request.form.get('shortUrl', None)
-    duration = request.form.get('duration', "0")
+    duration = int(request.form.get('duration', "-1"))
     if longUrl is None or len(longUrl.strip()) < 3:
         return render_template("index.html", error="请输入长网址！")
     #如果用户有定义短网址则检测短网址是否可用
@@ -65,13 +81,16 @@ def shortURL():
             return render_template("index.html", error="自定义短网址长度必须大于等于3！")
         elif not containsAny(shortUrl, url.codeArray):
             return render_template("index.html", error="自定义短网址只可以由数字、大小写字母、下划线(_)和中划线(-)组成！")
-    shortUrl = url.shortenURL(longUrl)[random.randint(0, 3)]
-    print shortUrl
-    urlPool[shortUrl] = longUrl
-    myUrls = session.get('myUrls', dict())
-    myUrls[longUrl] = shortUrl
-    session['myUrls'] = myUrls
-    #return jsonify(shortUrl)
+        elif not storeToRedis(shortUrl, longUrl, duration):
+            return render_template("index.html", error="自定义短网址已存在！")
+    else:
+        success = False
+        for shortUrl in url.shortenURL(longUrl):
+            if storeToRedis(shortUrl, longUrl, duration):
+                success = True
+                break
+        if not success:
+            return render_template("index.html", error="短网址生成失败TAT...")
     return redirect(url_for("index"))
 
 if __name__ == '__main__':
