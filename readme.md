@@ -1,4 +1,4 @@
-pyShortenURL
+pyShortenURL [![Build Status](https://secure.travis-ci.org/jhezjkp/pyShortenURL.png)](http://travis-ci.org/jhezjkp/pyShortenURL) [![endorse](http://api.coderwall.com/jhezjkp/endorsecount.png)](http://coderwall.com/jhezjkp)
 ===
 
 a URL shorten service written in python.
