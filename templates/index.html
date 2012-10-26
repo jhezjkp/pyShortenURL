@@ -1,8 +1,74 @@
 {% extends "base.html" %}
 
+{% block head %}
+<script type="text/javascript">
+  $(function() {
+    $("#longUrl").bind("propertychange input", function() {
+      this.value = this.value.replace("http://", "");
+    });
+    $("#durationDiv").find(".btn").each(function(){
+        $(this).bind('click', function(){
+              $("#duration").val(this.value)
+        });
+    });
+  });
+</script>
+{% endblock %}
+
 {% block main %}
-<form action="/shortURL" method="post">
-  <input type="text" name="url" size="30" value="163.com">
-  <input type="submit">
-</form>
+<div class="offset2 span8">
+  {% if error %}
+    <div class="alert alert-error">
+      {{error}}
+    </div>
+  {% endif %}
+  <div id="formDiv">
+    <form action="/shortURL" method="post">
+      <div class="input-prepend">
+        <span class="add-on">http://</span>
+        <input type="text" id="longUrl" name="longUrl" class="input-xxlarge" placeholder="输入你要缩短的长网址">
+      </div>
+      <div class="input-prepend">
+        <span class="add-on">{{request.url_root}}</span>
+        <input type="text" id="shortUrl" name="shortUrl" class="input-medium" placeholder="自定义短网址"/>
+      </div>
+      <input type="hidden" id="duration" name="duration" value="0"/>
+      <div id="durationDiv" class="btn-group" data-toggle="buttons-radio">
+        <button type="button" class="btn" value="2">2小时</button>
+        <button type="button" class="btn" value="24">1天</button>
+        <button type="button" class="btn" value="168">1周</button>
+        <button type="button" class="btn" value="720">1月</button>
+        <button type="button" class="btn" value="87600">1年</button>
+        <button type="button" class="btn active" value="0">永久</button>
+      </div>
+      <button type="submit" class="btn">生成短网址</button>
+    </form>
+  </div>
+  {% if session['myUrls'] %}
+    <div id="shortUrlTable">
+      <table class="table table-hover table-striped">
+        <thead>
+          <tr>
+            <th>长网址</th>
+            <th>创建时间</th>
+            <th>短网址</th>
+            <th详情</th>
+            <th>点击数</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for key, value in session['myUrls'].items() %}
+            <tr>
+              <td><a href="http://{{key}}" target="_blank">{{key}}</a></td>
+              <td>2012-10-26</td>
+              <td>{{value}}</td>
+              <td>==</td>
+              <td>0</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% endif %}
+</div>
 {% endblock %}

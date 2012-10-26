@@ -4,13 +4,21 @@
   <meta charset="UTF-8">
   <title>短网址服务</title>
   <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.1.1/css/bootstrap-combined.min.css" rel="stylesheet">
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
   <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.1.1/js/bootstrap.min.js"></script>
+  <style type="text/css">
+    body { margin-top: 50px; clear: both;}
+  </style>
+  {% block head %}
+  {% endblock %}
 </head>
 <body>
   <!-- main content -->
     <div id="main" class="container-fluid">        
+      <div class="row-fluid">
         {% block main %}
         {% endblock %}
+      </div>
     </div>
 </body>
 </html>
