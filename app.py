@@ -7,8 +7,10 @@
 
 import os
 import sys
-from flask import Flask, request, redirect, url_for, render_template, abort, send_from_directory, jsonify, session
+import StringIO
+from flask import Flask, request, redirect, url_for, render_template, abort, send_from_directory, send_file, jsonify, session
 import redis
+import qrcode
 
 import url
 
@@ -44,6 +46,19 @@ def gotoURL(url):
         return redirect("http://" + longUrl, 301)
     else:
         abort(404)
+
+
+@app.route('/<url>.qr')
+def showQRCode(url):
+    '''显示短网址对应二维码'''
+    if not r.get(url):
+        abort(404)
+    img = qrcode.make(request.url_root + url)
+    buf = StringIO.StringIO()
+    img.save(buf, 'png')
+    buf.seek(0)
+    #img = Image.open(StringIO.StringIO()(img_data))
+    return send_file(buf, mimetype='image/png')
 
 
 def containsAny(seq, aset):
