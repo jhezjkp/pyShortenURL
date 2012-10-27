@@ -102,7 +102,8 @@ def storeToRedis(shortUrl, longUrl, durationInHours):
     r.hmset(shortUrl + "#", {"createTime": str(datetime.now().strftime("%Y-%m-%d %H:%M:%S")), "visit": 0})
     #更新生存时间
     if durationInHours > 0:
-        return r.expire(shortUrl, durationInHours * 3600)
+        r.expire(shortUrl, durationInHours * 3600)
+        r.expire(shortUrl + "#", durationInHours * 3600)
     return True
 
 
