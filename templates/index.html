@@ -44,7 +44,7 @@
       <button type="submit" class="btn">生成短网址</button>
     </form>
   </div>
-  {% if session['myUrls'] %}
+  {% if urlList %}
     <div id="shortUrlTable">
       <table class="table table-hover table-striped">
         <thead>
@@ -52,18 +52,20 @@
             <th>长网址</th>
             <th>创建时间</th>
             <th>短网址</th>
+            <th>有效期</th>
             <th>二维码</th>
             <th>点击数</th>
           </tr>
         </thead>
         <tbody>
-          {% for key, value in session['myUrls'].items() %}
+          {% for data in urlList %}
             <tr>
-              <td><a href="http://{{key}}" target="_blank">{{key}}</a></td>
-              <td>2012-10-26</td>
-              <td><a href="/{{value}}">{{value}}</a></td>
-              <td><a href="/{{value}}.qr">QR</a></td>
-              <td>0</td>
+              <td><a href="http://{{data[1]}}" target="_blank">{{data[1]}}</a></td>
+              <td>{{data[3]}}</td>
+              <td><a href="/{{data[0]}}">{{data[0]}}</a></td>
+              <td>{{data[2]}}
+              <td><a href="/{{data[0]}}.qr">QR</a></td>
+              <td>{{data[4]}}</td>
             </tr>
             {% endfor %}
         </tbody>

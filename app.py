@@ -7,8 +7,9 @@
 
 import os
 import sys
+from datetime import datetime
 import StringIO
-from flask import Flask, request, redirect, url_for, render_template, abort, send_from_directory, send_file, jsonify, session
+from flask import Flask, request, redirect, url_for, render_template, abort, send_from_directory, send_file, session
 import redis
 import qrcode
 
@@ -29,7 +30,11 @@ def favicon():
 
 @app.route('/')
 def index():
-    return render_template("index.html")
+    urlList = list()
+    for shortUrl in session.get('myUrls', list()):
+        if r.exists(shortUrl):
+            urlList.append([shortUrl, r.get(shortUrl), formatDuration(r.ttl(shortUrl))] + r.hmget(shortUrl + "#", "createTime", "visit"))
+    return render_template("index.html", urlList=urlList)
 
 
 @app.errorhandler(404)
@@ -37,12 +42,28 @@ def pageNotFound(e):
     return render_template("404.html")
 
 
-@app.route('/<url>')
-def gotoURL(url):
+def formatDuration(seconds):
+    '''将秒种数转换成可读的时间段'''
+    if seconds < 0:
+        return "永久"
+    desc = ""
+    aMap = {60 * 60 * 24 * 365: "年", 60 * 60 * 24 * 30: "月", 60 * 60 * 24: "日", 60 * 60: "小时", 60: "分钟", 1: "秒"}
+    keys = [60 * 60 * 24 * 365, 60 * 60 * 24 * 30, 60 * 60 * 24, 60 * 60, 60, 1]
+    for key in keys:
+        data = seconds / key
+        if data > 0:
+            desc += str(data) + aMap[key]
+            seconds -= data * key
+    return desc
+
+
+@app.route('/<shortUrl>')
+def gotoURL(shortUrl):
     #print request.headers
     #print request.remote_addr
-    longUrl = r.get(url)
+    longUrl = r.get(shortUrl)
     if longUrl:
+        r.hincrby(shortUrl + "#", "visit",  1)
         return redirect("http://" + longUrl, 301)
     else:
         abort(404)
@@ -74,9 +95,11 @@ def storeToRedis(shortUrl, longUrl, durationInHours):
     if not r.setnx(shortUrl, longUrl) and r.get(shortUrl) != longUrl:
         return False
     #保存到会话中
-    myUrls = session.get('myUrls', dict())
-    myUrls[longUrl] = shortUrl
+    myUrls = session.get('myUrls', set())
+    myUrls.add(shortUrl)
     session['myUrls'] = myUrls
+    #保存访问统计
+    r.hmset(shortUrl + "#", {"createTime": str(datetime.now().strftime("%Y-%m-%d %H:%M:%S")), "visit": 0})
     #更新生存时间
     if durationInHours > 0:
         return r.expire(shortUrl, durationInHours * 3600)
@@ -89,7 +112,7 @@ def shortURL():
     shortUrl = request.form.get('shortUrl', None)
     duration = int(request.form.get('duration', "-1"))
     if longUrl is None or len(longUrl.strip()) < 3:
-        return render_template("index.html", error="请输入长网址！")
+        return render_template("index.html", error="请输入合法长网址！")
     #如果用户有定义短网址则检测短网址是否可用
     if shortUrl:
         if len(shortUrl.strip()) < 3:
@@ -111,4 +134,5 @@ def shortURL():
 if __name__ == '__main__':
     reload(sys)
     sys.setdefaultencoding("utf-8")
+    app.run(host='0.0.0.0', debug=True)
     app.run(host='0.0.0.0', debug=True)
