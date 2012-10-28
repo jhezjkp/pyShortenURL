@@ -3,8 +3,8 @@
 {% block head %}
 <script type="text/javascript">
   $(function() {
-    $("#longUrl").bind("propertychange input", function() {
-      this.value = this.value.replace("http://", "");
+    $("#longUrl").bind("keydown keyup blur", function() {
+      this.value = this.value.replace("http://", "").replace("https://", "");
     });
     $("#durationDiv").find(".btn").each(function(){
         $(this).bind('click', function(){
