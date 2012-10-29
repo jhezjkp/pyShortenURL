@@ -3,6 +3,10 @@ pyShortenURL [![Build Status](https://secure.travis-ci.org/jhezjkp/pyShortenURL.
 
 a URL shorten service written in python.
 
+[__redis__](http://redis.io/) required.
+
+demo: [http://v.vivia.me](http://v.vivia.me)
+
 
 quick start
 ===
