@@ -1,2 +1,2 @@
 #!/bin/bash
-nohup  python app.py > nohup.out 2>&1  &
+nohup python shorturl/app.py  > nohup.out 2>&1  &

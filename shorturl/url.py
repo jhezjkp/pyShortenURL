@@ -39,11 +39,3 @@ def shortenURL(url):
         urls.append(url)
         index += 8
     return urls
-
-if __name__ == '__main__':
-    #测试一下
-    import os
-    i = 500
-    while i > 0:
-        print shortenURL(os.urandom(random.randint(5, 32)).encode('hex'))[random.randint(0, 3)]
-        i -= 1
