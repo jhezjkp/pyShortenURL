@@ -19,23 +19,15 @@ def shortenURL(url):
     md5 = hashlib.md5()
     md5.update(url)
     hexStr = md5.hexdigest()
-    index = 0
-    while index < len(hexStr):
+    urls = []
+    for i in range(1, 5):
+        #8位字符为一组，将其看成16进制数再与0x3fffffff(30位1)相与
+        #再转化成二进制，如果不满30位则在左边补0)
+        segment = (bin(int(hexStr[8 * (i - 1):8 * i], 16) & 0x3fffffff)[2:]).rjust(30, '0')
+        #6位一组，分成5组
+        #将各组转成十进制作为索引值从a-zA-Z_-中取对应的值从而获取5位字符长度的短网址
         url = ""
-        #取8位
-        segment = hexStr[index:index + 8]
-        #将他看成16进制串与0x3fffffff(30位1)与操作, 即超过30位的忽略处理
-        segment = bin(int(segment, 16) & 0x3fffffff)[2:]
-        first_len = 6
-        if len(segment) % 6 > 0:
-            first_len = len(segment) % 6
-        start = 0
-        for i in range(1, 6):
-            if start > len(segment) - 1:
-                break
-            end = first_len + (i - 1) * 6
-            url += codeArray[int('0b' + segment[start:end], 0)]
-            start = end
+        for j in range(1, 6):
+            url += codeArray[int(segment[6 * (j - 1):6 * j], 2)]
         urls.append(url)
-        index += 8
     return urls
