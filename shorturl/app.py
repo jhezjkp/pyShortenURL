@@ -47,7 +47,7 @@ def formatDuration(seconds):
     if seconds < 0:
         return "永久"
     desc = ""
-    aMap = {60 * 60 * 24 * 365: "年", 60 * 60 * 24 * 30: "月", 60 * 60 * 24: "日", 60 * 60: "小时", 60: "分钟", 1: "秒"}
+    aMap = {60 * 60 * 24 * 365: "年", 60 * 60 * 24 * 30: "月", 60 * 60 * 24: "日", 60 * 60: "小时", 60: "分", 1: "秒"}
     keys = [60 * 60 * 24 * 365, 60 * 60 * 24 * 30, 60 * 60 * 24, 60 * 60, 60, 1]
     for key in keys:
         data = seconds / key
@@ -135,5 +135,4 @@ def shortURL():
 if __name__ == '__main__':
     reload(sys)
     sys.setdefaultencoding("utf-8")
-    app.run(host='0.0.0.0', debug=True)
     app.run(host='0.0.0.0', debug=True)
