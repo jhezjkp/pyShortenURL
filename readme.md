@@ -5,7 +5,7 @@ a URL shorten service written in python.
 
 [__redis__](http://redis.io/) required.
 
-demo: [http://v.vivia.me](http://v.vivia.me)
+demo: [http://do.vivia.me](http://do.vivia.me)
 
 
 quick start
