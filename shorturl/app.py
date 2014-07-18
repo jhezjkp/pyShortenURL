@@ -11,7 +11,6 @@ from datetime import datetime
 import StringIO
 from flask import Flask, request, redirect, url_for, render_template, abort, send_from_directory, send_file, session
 import redis
-import qrcode
 
 import url
 
@@ -74,12 +73,7 @@ def showQRCode(url):
     '''显示短网址对应二维码'''
     if not r.get(url):
         abort(404)
-    img = qrcode.make(request.url_root + url)
-    buf = StringIO.StringIO()
-    img.save(buf, 'png')
-    buf.seek(0)
-    #img = Image.open(StringIO.StringIO()(img_data))
-    return send_file(buf, mimetype='image/png')
+    return render_template("qr.html", url=url)
 
 
 def containsAny(seq, aset):

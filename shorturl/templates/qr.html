@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block head %}
+<script type="text/javascript">
+  $(function() {
+    $('#qrcode').qrcode({width: 128,height: 128,text: "{{request.url_root}}{{url}}"});
+  });
+</script>
+{% endblock %}
+
+{% block main %}
+<div class="offset2 span8">
+  Scan this with your phone:
+  <div id="qrcode"></div>
+</div>
+{% endblock %}
